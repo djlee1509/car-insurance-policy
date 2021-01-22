@@ -1,6 +1,7 @@
 from flask import Flask, render_template, session, g, request, redirect, url_for
 from model import User
 import requests
+from werkzeug.security import safe_str_cmp
 
 
 users = [
@@ -33,7 +34,7 @@ def get_policy_details(username, password):
     policy_req = requests.get(policy_url, headers=policy_headers)
     policy_json = policy_req.json()
 
-    return render_template('policy.html', policy=policy_json)
+    return policy_json
 
 
 @app.before_request
@@ -41,11 +42,11 @@ def before_request():
     g.user = None
 
     if 'user_id' in session:
-        user = [x for x in users if x.id == session['user_id']][0]
+        user = [x for x in users if safe_str_cmp(x.id, session['user_id'])][0]
         g.user = user
 
 
-@app.route('/login', methods=['Get', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         session.pop('user_id', None)
@@ -53,25 +54,31 @@ def login():
         username = request.form.get('username', None)
         password = request.form.get('password', None)
 
-        current_users = [x for x in users if x.username == username]
+        current_users = [x for x in users if safe_str_cmp(x.username, username)]
 
         if not current_users:
             return redirect(url_for('login'))
 
         current_user = current_users[0]
-        if current_user and current_user.password == password:
+        if current_user and safe_str_cmp(current_user.password, password):
             session['user_id'] = current_user.id
-            return get_policy_details(current_user.username, current_user.password)
+            return redirect(url_for('policy'))
 
     return render_template('login.html')
 
 
-@app.route('/policy')
+@app.route('/policy', methods=['GET'])
 def policy():
     if not g.user:
         return redirect(url_for('login'))
 
-    return render_template('policy.html')
+    policy_detail = get_policy_details(g.user.username, g.user.password)
+
+    policy_dict = policy_detail['policy']
+    car = policy_detail['vehicle']
+    address = policy_dict['address']
+
+    return render_template('policy.html', policy=policy_dict, vehicle=car, address=address)
 
 
 if __name__ == "__main__":
