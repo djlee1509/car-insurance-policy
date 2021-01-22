@@ -9,12 +9,16 @@
         <h1>My Policy</h1>
         <hr style="margin-right: 30px;">
         <h3>Policy Reference</h3>
-
+        <p>{{ policy['policy_ref'] }}</p>
+        <br>
         <h3>Cover Type</h3>
-
+        <p>{{ policy['cover'] }}</p>
+        <br>
         <h3>Car</h3>
-
+        <p>{{ vehicle['make'].title() }}, {{ vehicle['model'].title() }}, {{ vehicle['colour'].title() }}, {{ vehicle['reg'] }}</p>
+        <br>
         <h3>Address</h3>
+        <p>{{ address['line_1'] }}, {{ address['line_2'] }}, {{ address['postcode'] }}</p>
     </div>
 </body>
 </html>
