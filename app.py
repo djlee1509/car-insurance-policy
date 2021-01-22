@@ -14,6 +14,10 @@ app.secret_key = 'minidemo'
 
 
 def get_policy_details(username, password):
+    """
+    Returns policy details in json form given username and password.
+    """
+
     auth_url = "https://api.bybits.co.uk/auth/token"
     policy_url = "https://api.bybits.co.uk/policys/details"
 
@@ -48,6 +52,10 @@ def before_request():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Redirects to policy page after user authenticated.
+    If user is failed to authenticate, it stays at login page for another try.
+    """
     if request.method == 'POST':
         session.pop('user_id', None)
 
@@ -69,6 +77,9 @@ def login():
 
 @app.route('/policy', methods=['GET'])
 def policy():
+    """
+    Render Policy templates with data.
+    """
     if not g.user:
         return redirect(url_for('login'))
 
@@ -82,4 +93,4 @@ def policy():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
